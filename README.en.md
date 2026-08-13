@@ -2,6 +2,8 @@
 
 > **中文版**: [README.md](README.md) · Keep this file in sync whenever you update README.md.
 
+![License](https://img.shields.io/badge/license-MIT-green) ![Release](https://img.shields.io/github/v/release/kimirong/deepseek-harness-desktop) ![macOS](https://img.shields.io/badge/platform-macOS_arm64-brightgreen) ![Windows](https://img.shields.io/badge/platform-Windows-unverified-orange)
+
 > A lightweight desktop client: connects to or starts the local DeepSeek Harness server and opens its Web GUI in a native window.
 
 DeepSeek Harness Desktop is an Electron desktop shell. It does not re-implement any Harness functionality — it manages the lifecycle of the `dsh web` server: **probing** whether an instance is already running locally, **starting** the server (or letting the user start it with one click), and **cleaning up** orphan processes on exit — then presents the Web GUI as a native desktop app.

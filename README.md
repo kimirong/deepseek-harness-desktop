@@ -2,6 +2,8 @@
 
 > **English**: [README.en.md](README.en.md) · 更新本文档时请同步修改英文版（README.en.md）。
 
+![License](https://img.shields.io/badge/license-MIT-green) ![Release](https://img.shields.io/github/v/release/kimirong/deepseek-harness-desktop) ![macOS](https://img.shields.io/badge/platform-macOS_arm64-brightgreen) ![Windows](https://img.shields.io/badge/platform-Windows-unverified-orange)
+
 > 一个轻量的桌面客户端：连接或启动本机的 DeepSeek Harness 服务，在原生窗口中打开 Web GUI。
 
 DeepSeek Harness Desktop 是一个 Electron 桌面壳。它不重新实现任何 Harness 功能，而是管理 `dsh web` 服务的生命周期——**探测**本机是否已有实例、**启动**服务（或让用户一键启动）、**清理**退出时的孤儿进程——然后把 Web GUI 呈现为原生桌面应用。
