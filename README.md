@@ -1,5 +1,7 @@
 # dsh-web-desktop-shell
 
+> **English**: [README.en.md](README.en.md) · 更新本文档时请同步修改英文版（README.en.md）。
+
 一个极简的 Electron 桌面壳：**启动（或连接）本机 `dsh web` 服务，然后在原生窗口里显示 DeepSeek Harness Web GUI**。
 
 壳本身不渲染任何 UI 逻辑——它只负责三件事：
@@ -50,7 +52,7 @@ demo-03/
 │   ├── config.js       # 配置与 dsh 启动器解析（env 可覆盖）
 │   ├── server.js       # 探测 / spawn / 就绪解析 / 停止服务
 │   └── server.test.js  # 单元测试（不依赖 Electron）
-└── README.md
+└── README.md           # 中文说明（更新时同步 README.en.md）
 ```
 
 ## 运行
@@ -96,27 +98,6 @@ npm run dist        # 当前平台产物：macOS → dmg，Windows → NSIS
 
 `electron-builder` 配置已在 `package.json` 的 `build` 字段中；未签名构建（本机自用）加 `CSC_IDENTITY_AUTO_DISCOVERY=false`。
 
-### 网络坑（实测踩过，务必看）
-
-electron-builder 每次构建都会重新下载两个产物，走代理（如 Clash）时连接经常在 TLS 握手或传输中途被断，构建报
-`Client network socket disconnected before secure TLS connection was established`：
-
-| 产物 | 缓存位置 | 规避 |
-|---|---|---|
-| electron zip（~120MB） | `~/Library/Caches/electron-builder/downloads/<sha256>/` | 见下方 `electronDist` 覆盖 |
-| dmgbuild-bundle（22MB） | `~/Library/Caches/electron-builder/dmg-builder@1.2.5/` | 手动下载后放进去，自动校验 SHA256 |
-
-**离线构建命令（推荐）**——先手动下载两个产物并放入缓存（可用 `https://registry.npmmirror.com/-/binary/...`，GitHub 直连在国内很慢），然后：
-
-```sh
-ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ \
-CSC_IDENTITY_AUTO_DISCOVERY=false \
-npx electron-builder --mac dmg \
-  -c.electronDist="$HOME/Library/Caches/electron-builder/downloads/<sha256>/electron-v<版本>-darwin-arm64.zip"
-```
-
-`electronDist` 指向本地 zip 后，打包全程零网络。dmgbuild 产物校验和可从 `node_modules/dmg-builder/out/dmgUtil.js` 查到。
-
 ### 体积优化（已内置）
 
 `scripts/afterPack.js` 在打包时自动裁剪 Electron 自带的语言包（220 个 `.lproj` / 55 个 `.pak`，共 ~47MB），只保留中英文。实测收益：
@@ -155,7 +136,6 @@ npm start            # 直接跑；或先全局安装 dsh 后运行
 **交叉构建 win64 便携 zip（macOS 上可行，无需 wine）**——跳过 resedit（图标/元数据编辑，需 wine），用本地 win32-x64 electron zip：
 
 ```sh
-# 先下载 https://registry.npmmirror.com/-/binary/electron/v43.4.0/electron-v43.4.0-win32-x64.zip
 CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win zip --x64 \
   -c.electronDist=/tmp/electron-v43.4.0-win32-x64.zip \
   -c.win.signAndEditExecutable=false
@@ -165,21 +145,16 @@ CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win zip --x64 \
 
 **NSIS 安装包**（`npm run dist` 在 Windows 上产出 `*-setup.exe`）必须在 Windows 上构建——macOS 交叉构建 NSIS 需要 wine，不推荐。
 
-Windows 网络坑与 macOS 相同：electron-builder 会下载 `electron-v<版本>-win32-x64.zip`（约 100MB），代理不稳时同样用
-`-c.electronDist=<本地zip>` 离线方案；缓存位置是 `%LOCALAPPDATA%\electron-builder\Cache`。
-
 **Windows 特有风险（未实测，建议首跑验证）**：
 
 | 风险点 | 说明 |
 |---|---|
 | spawn 引号 | `shell: true` + 参数数组在 cmd 下的拼接行为，需要实机确认（当前参数都是简单 token，风险低） |
 | dsh 安装形态 | 用户机器上 dsh 可能是 `dsh.exe` / `dsh.cmd` / 未安装——未安装时 boot screen 会给出指引（设置 `DSH_BIN`） |
-| 代理软件 | Windows 常见代理（Clash for Windows 等）同样可能劫持 loopback，`<-loopback>` 绕过已内置 |
 | taskkill 清理 | 进程树强杀路径已写，但 Windows 上退出时的实际表现需实机验证 |
 
 ## 注意事项
 
 - **只绑本机**：harness 默认只监听 `127.0.0.1`，且源码显式拒绝 `--host 0.0.0.0`（安全红线）。本壳只能做本机客户端。
-- **代理**：环境里的 `http_proxy`（如 Clash 7897）会把 loopback 请求变成 502；主进程已加 `--proxy-bypass-list=<-loopback>` 规避。
 - **Windows spawn**：win32 下所有 spawn 走 `shell: true`，自动兼容 `pnpm.cmd` / `dsh.cmd`。
 - **连已有实例时**：壳不会杀掉它（`child: null`，只读连接）；只有自己 spawn 的服务才会在退出时被清理。
