@@ -22,6 +22,9 @@ module.exports = {
   // quits unless `--keep-open` is also passed. Used for verification.
   screenshot: process.argv.includes('--screenshot') || process.env.DSH_SHELL_SCREENSHOT === '1',
   keepOpen: process.argv.includes('--keep-open'),
+  // Screenshot the "ready" transition state (server started, about to open the
+  // GUI) instead of the GUI itself. Verification/product-shot aid only.
+  shotReady: process.env.DSH_SHELL_SHOT_READY === '1',
   launcher: resolveLauncher(),
 }
 

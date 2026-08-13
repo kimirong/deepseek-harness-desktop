@@ -44,6 +44,8 @@ function launcherDetail() {
 async function connectExisting(port) {
   server = { mode: 'connect', url: `http://127.0.0.1:${port}/`, child: null }
   console.log(`[dsh-shell] mode=connect url=${server.url}`)
+  sendBootState({ phase: 'ready', text: '已连接，正在打开…', detailKind: 'info', detail: server.url })
+  await new Promise((resolve) => setTimeout(resolve, 600))
   await win.loadURL(server.url)
 }
 
@@ -67,6 +69,15 @@ async function startServerFlow() {
     server = { mode: 'spawn', url, child: spawned.child }
     console.log(`[dsh-shell] mode=spawn url=${url}`)
     watchChild(spawned.child)
+    sendBootState({ phase: 'ready', text: '服务已就绪，正在打开…', detailKind: 'info', detail: url })
+    if (config.shotReady) {
+      // Product-shot aid: hold the ready state so it can be captured.
+      await new Promise((resolve) => setTimeout(resolve, 2500))
+      await capturePageToFile()
+      app.quit()
+      return
+    }
+    await new Promise((resolve) => setTimeout(resolve, 600))
     await win.loadURL(url)
   } catch (err) {
     server = null
@@ -147,17 +158,21 @@ function watchChild(child) {
   })
 }
 
-// Verification aid: capture whatever is on screen (GUI or boot screen) to
-// ./shell-screenshot.png, then quit unless --keep-open was passed.
+// Capture whatever is on screen (GUI or boot screen) to ./shell-screenshot.png.
+async function capturePageToFile() {
+  if (!win || win.isDestroyed()) return
+  const image = await win.webContents.capturePage()
+  const out = path.resolve(process.cwd(), 'shell-screenshot.png')
+  fs.writeFileSync(out, image.toPNG())
+  console.log(`[dsh-shell] screenshot saved: ${out}`)
+}
+
+// Verification aid: capture after the page settles, then quit unless
+// --keep-open was passed.
 function scheduleScreenshot() {
   if (!config.screenshot) return
   setTimeout(async () => {
-    if (win && !win.isDestroyed()) {
-      const image = await win.webContents.capturePage()
-      const out = path.resolve(process.cwd(), 'shell-screenshot.png')
-      fs.writeFileSync(out, image.toPNG())
-      console.log(`[dsh-shell] screenshot saved: ${out}`)
-    }
+    await capturePageToFile()
     if (!config.keepOpen) app.quit()
   }, 2500)
 }

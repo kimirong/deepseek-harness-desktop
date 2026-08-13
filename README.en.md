@@ -23,10 +23,12 @@ The boot screen is the core UI of the client, covering every "server not running
 
 | | |
 |---|---|
-| ![No server detected: one-click start](assets/screenshot-boot.png) | ![Starting the server](assets/screenshot-starting.png) |
-| No server detected — "Start server" button | Starting the server (progress) |
-| ![Start failure: error details and retry](assets/screenshot-error.png) | ![dsh not found: setup guidance](assets/screenshot-nolauncher.png) |
-| Start failure — error details + "Retry start" | `dsh` not found — setup guidance + "Re-detect" |
+| ![Start success: server ready](assets/screenshot-success.png) | ![No server detected: one-click start](assets/screenshot-boot.png) |
+| Start success — server ready, opening the GUI | No server detected — "Start server" button |
+| ![Starting the server](assets/screenshot-starting.png) | ![Start failure: error details and retry](assets/screenshot-error.png) |
+| Starting the server (progress) | Start failure — error details + "Retry start" |
+| ![dsh not found: setup guidance](assets/screenshot-nolauncher.png) | **Connecting to an existing instance** |
+| `dsh` not found — setup guidance + "Re-detect" | Opens directly when an instance is detected (no separate screen) |
 
 ## Installation
 

@@ -66,8 +66,10 @@
 
   // State from the main process: { phase, text, detail, detailKind, launcher, error }
   window.dshBoot.onState((s) => {
-    statusText.textContent = s.text
+    const isReady = s.phase === 'ready'
+    statusText.textContent = (isReady ? '✓ ' : '') + s.text
     statusText.dataset.text = s.text
+    statusText.style.color = isReady ? '#3fb950' : ''
 
     const showDetail = Boolean(s.detail)
     detail.classList.toggle('hidden', !showDetail)
