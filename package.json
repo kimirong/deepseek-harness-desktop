@@ -1,0 +1,36 @@
+{
+  "name": "dsh-web-desktop-shell",
+  "version": "0.1.0",
+  "private": true,
+  "author": "dsh-web-desktop-shell contributors",
+  "description": "Thin Electron shell: connects to a running `dsh web` instance or spawns one, then shows the DeepSeek Harness GUI in a native window.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "test": "node --test src/*.test.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "ai.deepseek.harness.shell",
+    "productName": "DeepSeek Harness",
+    "afterPack": "./scripts/afterPack.js",
+    "files": [
+      "src/**/*",
+      "package.json",
+      "!shell-screenshot.png"
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.developer-tools"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "devDependencies": {
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3"
+  }
+}

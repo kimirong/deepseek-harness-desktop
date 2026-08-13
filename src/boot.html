@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>DeepSeek Harness</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #0d1117; color: #c9d1d9; display: grid; place-items: center; height: 100vh;
+  }
+  .card { max-width: 560px; padding: 40px 32px; text-align: center; }
+  .logo { font-size: 28px; font-weight: 600; color: #e6edf3; margin-bottom: 6px; }
+  .sub { color: #8b949e; font-size: 13px; margin-bottom: 32px; }
+  .status { font-size: 16px; margin-bottom: 24px; min-height: 26px; }
+  .spinner {
+    display: inline-block; width: 16px; height: 16px; margin-right: 8px;
+    border: 2px solid #30363d; border-top-color: #58a6ff; border-radius: 50%;
+    animation: spin .9s linear infinite; vertical-align: -2px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .detail {
+    font-size: 13px; color: #8b949e; background: #161b22; border: 1px solid #30363d;
+    border-radius: 8px; padding: 12px 16px; margin-bottom: 28px; text-align: left;
+    white-space: pre-wrap; word-break: break-all; line-height: 1.6;
+  }
+  .detail.error { border-color: #f85149; color: #ff7b72; }
+  .detail.info  { border-color: #1f6feb; color: #79c0ff; }
+  .actions button {
+    font-size: 15px; padding: 10px 28px; border-radius: 8px; cursor: pointer; margin: 0 6px;
+    border: 1px solid #30363d; background: #21262d; color: #c9d1d9;
+  }
+  .actions button:hover { background: #30363d; }
+  .actions button.primary { background: #238636; border-color: rgba(46,160,67,.4); color: #fff; }
+  .actions button.primary:hover { background: #2ea043; }
+  .actions button:disabled { opacity: .45; cursor: default; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">DeepSeek Harness</div>
+    <div class="sub">桌面客户端 · dsh web</div>
+    <div class="status" id="status">
+      <span class="spinner"></span><span id="statusText">正在检测本地服务…</span>
+    </div>
+    <div class="detail hidden" id="detail"></div>
+    <div class="actions">
+      <button id="startBtn" class="primary hidden">一键启动服务</button>
+      <button id="retryBtn" class="hidden">重新检测</button>
+    </div>
+  </div>
+<script>
+  'use strict'
+  const $ = (id) => document.getElementById(id)
+  const statusText = $('statusText')
+  const detail = $('detail')
+  const startBtn = $('startBtn')
+  const retryBtn = $('retryBtn')
+
+  function setBusy(busy) {
+    startBtn.disabled = busy
+    retryBtn.disabled = busy
+    statusText.textContent = busy ? '正在启动服务…' : statusText.dataset.text || statusText.textContent
+  }
+
+  // State from the main process: { phase, text, detail, detailKind, launcher, error }
+  window.dshBoot.onState((s) => {
+    statusText.textContent = s.text
+    statusText.dataset.text = s.text
+
+    const showDetail = Boolean(s.detail)
+    detail.classList.toggle('hidden', !showDetail)
+    detail.classList.toggle('error', s.detailKind === 'error')
+    detail.classList.toggle('info', s.detailKind === 'info')
+    if (showDetail) detail.textContent = s.detail
+
+    startBtn.classList.toggle('hidden', s.phase !== 'idle' && s.phase !== 'error')
+    startBtn.textContent = s.phase === 'error' ? '重试启动' : '一键启动服务'
+    retryBtn.classList.toggle('hidden', s.phase !== 'idle' && s.phase !== 'error')
+    startBtn.disabled = false
+    retryBtn.disabled = false
+  })
+
+  startBtn.addEventListener('click', () => window.dshBoot.start())
+  retryBtn.addEventListener('click', () => window.dshBoot.retry())
+</script>
+</body>
+</html>
