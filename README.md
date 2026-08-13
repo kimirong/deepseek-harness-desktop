@@ -19,9 +19,14 @@ DeepSeek Harness Desktop 是一个 Electron 桌面壳。它不重新实现任何
 
 ## 界面预览
 
-启动器页面（检测服务 / 一键启动 / 重试）：
+启动器页面是客户端的核心界面，覆盖"服务没启动"的各种情况：
 
-![boot screen](assets/screenshot-boot.png)
+| | |
+|---|---|
+| ![未检测到服务：一键启动](assets/screenshot-boot.png) | ![正在启动服务](assets/screenshot-starting.png) |
+| 未检测到服务，显示「一键启动」 | 正在启动服务（进度提示） |
+| ![启动失败：错误详情与重试](assets/screenshot-error.png) | ![未找到 dsh：配置指引](assets/screenshot-nolauncher.png) |
+| 启动失败：错误详情 +「重试启动」 | 未找到 dsh：配置指引 +「重新检测」 |
 
 ## 安装
 

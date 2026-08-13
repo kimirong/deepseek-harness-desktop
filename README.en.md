@@ -19,9 +19,14 @@ DeepSeek Harness Desktop is an Electron desktop shell. It does not re-implement 
 
 ## Preview
 
-The boot screen (detect / one-click start / retry):
+The boot screen is the core UI of the client, covering every "server not running" case:
 
-![boot screen](assets/screenshot-boot.png)
+| | |
+|---|---|
+| ![No server detected: one-click start](assets/screenshot-boot.png) | ![Starting the server](assets/screenshot-starting.png) |
+| No server detected — "Start server" button | Starting the server (progress) |
+| ![Start failure: error details and retry](assets/screenshot-error.png) | ![dsh not found: setup guidance](assets/screenshot-nolauncher.png) |
+| Start failure — error details + "Retry start" | `dsh` not found — setup guidance + "Re-detect" |
 
 ## Installation
 
