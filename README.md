@@ -20,6 +20,12 @@
 - ✅ **macOS（Apple Silicon, arm64）**：已发布，安装包 `DeepSeek Harness-0.1.0-arm64.dmg`（见 GitHub Releases）。
 - ⚠️ **Windows（win64）**：**尚未验证、未发布**。代码层已做 win32 兼容（`shell: true`、`taskkill /T` 进程树清理、NSIS 配置），并已在 macOS 上交叉构建出 win64 便携 zip 验证打包链路；但**运行时行为未在 Windows 真机实测**，故本发行版不包含 Windows 安装包。详见下文 [Windows（win64）支持现状](#windowswin64-支持现状)。
 
+## 一起协作 🤝
+
+欢迎各位朋友来一起协作完善这个项目！无论是修复 bug、补充功能、完善文档，还是帮我们在 **Windows / Linux 真机上做验证**（目前仅 macOS 验证过），都非常欢迎。
+
+请通过 [GitHub Issues](https://github.com/kimirong/deepseek-harness-desktop/issues) 提出建议或反馈问题，也可以直接提交 Pull Request。
+
 ## 启动器页面（boot screen）
 
 窗口首屏是一个本地状态页（`src/boot.html`），处理"服务没启动"的所有情况：
