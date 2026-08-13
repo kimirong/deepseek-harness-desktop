@@ -1,160 +1,92 @@
-# dsh-web-desktop-shell
+# DeepSeek Harness Desktop
 
 > **English**: [README.en.md](README.en.md) · 更新本文档时请同步修改英文版（README.en.md）。
 
-一个极简的 Electron 桌面壳：**启动（或连接）本机 `dsh web` 服务，然后在原生窗口里显示 DeepSeek Harness Web GUI**。
+> 一个轻量的桌面客户端：连接或启动本机的 DeepSeek Harness 服务，在原生窗口中打开 Web GUI。
 
-壳本身不渲染任何 UI 逻辑——它只负责三件事：
+DeepSeek Harness Desktop 是一个 Electron 桌面壳。它不重新实现任何 Harness 功能，而是管理 `dsh web` 服务的生命周期——**探测**本机是否已有实例、**启动**服务（或让用户一键启动）、**清理**退出时的孤儿进程——然后把 Web GUI 呈现为原生桌面应用。
 
-1. **探测**：`127.0.0.1:3080` 上是否已有正在运行的 harness 实例（通过 index.html 里的 `__DSH_BOOT__` 注入标记识别，避免误连其他程序）。
-2. **启动或连接**：
-   - 已有实例 → 直接连接（`mode=connect`），**不**再起一个服务；
-   - 没有实例 → 显示**启动器页面**：自动（或点击「一键启动服务」）spawn 一个 `dsh web --port 0`（端口由系统分配，无冲突），解析就绪行 `dsh web: http://127.0.0.1:<port>`；
-   - 启动失败 / 找不到 dsh → 错误显示在启动器页面里（可重试、可重新检测），**不会弹窗退出**。
-3. **清理**：窗口关闭时对 spawn 出来的服务发 `SIGTERM`（5 秒后升级 `SIGKILL`），不留孤儿进程。
+## 特性
 
-> 为什么必须连后端：前端不是独立静态站，只有 `dsh web` 会往 index.html 注入 `window.__DSH_BOOT__` 并动态 serve 插件 bundle。壳永远不能离线加载静态文件。
+- **自动连接**：检测到本机已有 `dsh web` 实例时直接打开，不重复启动服务
+- **一键启动**：没有实例时自动（或点击按钮）启动一个 `dsh web --port 0`，端口由系统分配，无冲突
+- **友好的启动器页面**：启动失败、找不到 dsh 时，错误展示在页面内并提供重试/重新检测，不会弹窗退出
+- **干净退出**：关闭窗口自动停止自启服务（SIGTERM → SIGKILL），不留孤儿进程
+- **体积优化**：打包时裁剪 Electron 语言包，macOS 安装包 103MB
+- **开源**：MIT License
 
-## 发行状态
+## 界面预览
 
-**v0.1.0（2026-08-14）**
+启动器页面（检测服务 / 一键启动 / 重试）：
 
-- ✅ **macOS（Apple Silicon, arm64）**：已发布，安装包 `DeepSeek Harness-0.1.0-arm64.dmg`（见 GitHub Releases）。
-- ⚠️ **Windows（win64）**：**尚未验证、未发布**。代码层已做 win32 兼容（`shell: true`、`taskkill /T` 进程树清理、NSIS 配置），并已在 macOS 上交叉构建出 win64 便携 zip 验证打包链路；但**运行时行为未在 Windows 真机实测**，故本发行版不包含 Windows 安装包。详见下文 [Windows（win64）支持现状](#windowswin64-支持现状)。
+![boot screen](assets/screenshot-boot.png)
 
-## 一起协作 🤝
+## 安装
 
-欢迎各位朋友来一起协作完善这个项目！无论是修复 bug、补充功能、完善文档，还是帮我们在 **Windows / Linux 真机上做验证**（目前仅 macOS 验证过），都非常欢迎。
+从 [GitHub Releases](https://github.com/kimirong/deepseek-harness-desktop/releases) 下载 `DeepSeek Harness-<版本>-arm64.dmg`，打开后将应用拖入「应用程序」文件夹。
 
-请通过 [GitHub Issues](https://github.com/kimirong/deepseek-harness-desktop/issues) 提出建议或反馈问题，也可以直接提交 Pull Request。
+> **系统要求**
+>
+> - macOS 13+（Apple Silicon, arm64）
+> - 本机已安装可用的 `dsh`（或通过环境变量 `DSH_BIN` 指定路径）
+> - 首次打开若提示"未验证的开发者"：系统设置 → 隐私与安全性 → 仍要打开
 
-## 启动器页面（boot screen）
+## 快速开始
 
-窗口首屏是一个本地状态页（`src/boot.html`），处理"服务没启动"的所有情况：
+1. 下载并安装 dmg（见上）
+2. 打开「DeepSeek Harness」
+3. 应用自动检测本机服务：有则直达，没有则显示「一键启动」按钮，点击即启动并进入
 
-| 场景 | 页面表现 |
+## 使用说明
+
+| 场景 | 行为 |
 |---|---|
-| 探测到已有实例 | 自动跳转 GUI（无感） |
-| 没有实例，有 dsh | 自动启动（进度提示）；或点「一键启动服务」 |
-| 启动失败 | 页面显示错误详情 + 「重试启动」+「重新检测」，不退出 |
-| 找不到 dsh | 页面给出配置指引（全局安装 dsh 或设置 `DSH_BIN`）+「重新检测」 |
-| 服务运行中意外退出 | 回到启动器页面显示「服务已退出」+ 重试 |
+| 本机已有 `dsh web` 实例（默认 3080） | 自动连接，不重复启动 |
+| 没有实例、已装 dsh | 自动启动，或点击「一键启动服务」 |
+| 启动失败 | 页面显示错误详情 +「重试启动」+「重新检测」 |
+| 未找到 dsh | 页面给出配置指引 +「重新检测」 |
+| 服务运行中意外退出 | 回到启动器页面，可重试 |
 
-## 目录结构
+常用配置（环境变量）：
 
-```
-demo-03/
-├── package.json        # electron 依赖 + electron-builder 打包配置
-├── src/
-│   ├── main.js         # Electron 主进程：窗口、boot screen 状态机、生命周期、清理
-│   ├── preload.js      # boot screen 与主进程的 IPC 桥（contextBridge）
-│   ├── boot.html       # 启动器页面（检测 / 一键启动 / 重试）
-│   ├── config.js       # 配置与 dsh 启动器解析（env 可覆盖）
-│   ├── server.js       # 探测 / spawn / 就绪解析 / 停止服务
-│   └── server.test.js  # 单元测试（不依赖 Electron）
-└── README.md           # 中文说明（更新时同步 README.en.md）
-```
-
-## 运行
-
-前置：仓库已构建（`pnpm run build`，否则 spawn 模式会失败）。
-
-```sh
-npm install        # 首次：安装 electron
-npm start          # 启动壳
-```
-
-启动器解析优先级（spawn 模式用）：
-
-| 优先级 | 方式 | 场景 |
+| 变量 | 默认 | 说明 |
 |---|---|---|
-| 1 | `$DSH_BIN` | 打包安装：指向 `dsh` 可执行文件 |
-| 2 | PATH 里的 `dsh` | 全局安装 |
-| 3 | `pnpm dsh`（仓库根目录） | 源码检出（默认，自动定位 `demo/demo-03` 上两级） |
+| `DSH_BIN` | — | 指定 `dsh` 可执行文件路径（打包安装时用） |
+| `DSH_SHELL_PORT` | `3080` | 探测端口：连接已运行实例时用 |
+| `DSH_SHELL_AUTO_START` | `1` | 设 `0` 则不自动启动，只显示「一键启动服务」按钮 |
 
-## 环境变量
+完整变量表见[开发者文档](docs/DEVELOPMENT.md)。
 
-| 变量 | 默认 | 作用 |
-|---|---|---|
-| `DSH_SHELL_PORT` | `3080` | 探测端口（connect 模式） |
-| `DSH_SHELL_TIMEOUT` | `120000` | spawn 就绪等待上限（ms） |
-| `DSH_SHELL_AUTO_START` | `1` | 探测失败后自动启动服务；设 `0` 则只显示「一键启动服务」按钮，等用户点击 |
-| `DSH_BIN` | — | 显式指定 `dsh` 可执行文件路径 |
-| `DSH_REPO_ROOT` | 自动 | 源码检出时的仓库根目录 |
+## 平台支持
 
-## 验证
-
-```sh
-npm test                    # 单元测试（不需要 Electron）
-npm start -- --screenshot   # 渲染 GUI 后截图到 ./shell-screenshot.png 并退出
-npm start -- --screenshot --keep-open   # 截图后保持窗口打开
-```
-
-## 打包（macOS / Windows）
-
-```sh
-npm run dist        # 当前平台产物：macOS → dmg，Windows → NSIS
-```
-
-`electron-builder` 配置已在 `package.json` 的 `build` 字段中；未签名构建（本机自用）加 `CSC_IDENTITY_AUTO_DISCOVERY=false`。
-
-### 体积优化（已内置）
-
-`scripts/afterPack.js` 在打包时自动裁剪 Electron 自带的语言包（220 个 `.lproj` / 55 个 `.pak`，共 ~47MB），只保留中英文。实测收益：
-
-| 产物 | 裁剪前 | 裁剪后 |
-|---|---|---|
-| macOS dmg | 114MB | 103MB |
-| win64 zip | 133MB | 123MB |
-
-剩余 ~100MB+ 是 Electron 运行时本体（Chromium + Node + V8 + ICU，主二进制 ~200MB 解压），压缩率已到极限——**想低于 ~30MB 只能换技术路线**（Tauri 或系统 WebView 壳，详见下节）。
-
-### 体积地板与更激进的路线
-
-| 方案 | 安装包体积 | 代价 |
-|---|---|---|
-| 当前 Electron 壳 | dmg 103MB / zip 123MB | 已到 Electron 地板 |
-| Electron + electron-updater | 首装不变，**后续更新只下差量（几 MB）** | 加发布服务器/签名 |
-| Tauri（系统 WebView + Rust） | 5–15MB | 主进程重写为 Rust，spawn/探测/启动器页面逻辑可平移 |
-| 原生 WebView 壳（Swift/C#） | ~1MB | 两套代码库（WKWebView + WebView2） |
-
-## Windows（win64）支持现状
-
-**代码层已兼容；win64 便携 zip 已在 macOS 上交叉构建成功**（产物 `dist/dsh-web-desktop-shell-0.1.0-win.zip`，内含 PE32+ x86-64 exe）；但**运行时行为尚未在 Windows 上实测**（本仓库只在 macOS 上开发验证过）。已做的兼容处理：
-
-- win32 下所有 spawn 走 `shell: true`，兼容 `pnpm.cmd` / `dsh.cmd` shim；`commandOnPath` 用 `where` 探测；
-- 进程树清理：win32 用 `taskkill /pid <pid> /t /f` 杀整棵进程树（`child.kill()` 在 Windows 只是强杀直接子进程，pnpm → node 的孙进程会残留成孤儿）；
-- 打包配置：`win.target: nsis`。
-
-**在 Windows 上运行**（需要 Windows 机器，Node 22+）：
-
-```sh
-npm install
-npm start            # 直接跑；或先全局安装 dsh 后运行
-```
-
-**交叉构建 win64 便携 zip（macOS 上可行，无需 wine）**——跳过 resedit（图标/元数据编辑，需 wine），用本地 win32-x64 electron zip：
-
-```sh
-CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --win zip --x64 \
-  -c.electronDist=/tmp/electron-v43.4.0-win32-x64.zip \
-  -c.win.signAndEditExecutable=false
-```
-
-注意：`signAndEditExecutable=false` 时 exe 保留默认文件名（`dsh-web-desktop-shell.exe`），且无图标/版本元数据。
-
-**NSIS 安装包**（`npm run dist` 在 Windows 上产出 `*-setup.exe`）必须在 Windows 上构建——macOS 交叉构建 NSIS 需要 wine，不推荐。
-
-**Windows 特有风险（未实测，建议首跑验证）**：
-
-| 风险点 | 说明 |
+| 平台 | 状态 |
 |---|---|
-| spawn 引号 | `shell: true` + 参数数组在 cmd 下的拼接行为，需要实机确认（当前参数都是简单 token，风险低） |
-| dsh 安装形态 | 用户机器上 dsh 可能是 `dsh.exe` / `dsh.cmd` / 未安装——未安装时 boot screen 会给出指引（设置 `DSH_BIN`） |
-| taskkill 清理 | 进程树强杀路径已写，但 Windows 上退出时的实际表现需实机验证 |
+| macOS（Apple Silicon, arm64） | ✅ 已发布 |
+| Windows（win64） | ⚠️ 代码已兼容，**未在真机验证、未发布** |
+| Linux | ❌ 未支持 |
 
-## 注意事项
+## 已知限制
 
-- **只绑本机**：harness 默认只监听 `127.0.0.1`，且源码显式拒绝 `--host 0.0.0.0`（安全红线）。本壳只能做本机客户端。
-- **Windows spawn**：win32 下所有 spawn 走 `shell: true`，自动兼容 `pnpm.cmd` / `dsh.cmd`。
-- **连已有实例时**：壳不会杀掉它（`child: null`，只读连接）；只有自己 spawn 的服务才会在退出时被清理。
+- **仅本机使用**：Harness 默认只监听 `127.0.0.1`（安全红线，源码显式拒绝 `--host 0.0.0.0`），本客户端不做远程访问
+- **未签名**：安装包为本地未签名构建，首次打开需在系统设置中手动允许
+- **Windows 未验证**：运行时行为尚未在 Windows 真机实测，发行版暂不含 Windows 安装包
+
+## 路线图
+
+- [ ] Windows 真机验证并发布安装包
+- [ ] Linux 支持
+- [ ] 体积优化路线：electron-updater 差量更新 / Tauri 迁移评估（见[开发者文档](docs/DEVELOPMENT.md)）
+
+## 开发者
+
+构建、测试、打包指引见[开发者文档](docs/DEVELOPMENT.md)。Tauri 迁移工作量评估见 [docs/tauri-migration.md](docs/tauri-migration.md)。
+
+## 贡献
+
+欢迎协作！无论是修复 bug、补充功能、完善文档，还是帮我们在 **Windows / Linux 真机上做验证**（目前仅 macOS 验证过）。
+
+请通过 [GitHub Issues](https://github.com/kimirong/deepseek-harness-desktop/issues) 反馈，或直接提交 Pull Request。
+
+## 许可
+
+[MIT](LICENSE) © 2026 kimirong
