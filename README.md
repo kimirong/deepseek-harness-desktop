@@ -20,7 +20,7 @@
   <img alt="Windows" src="https://img.shields.io/badge/Windows-unverified-171513.svg?style=flat-square" />
 </p>
 
-<img width="1280" alt="DeepSeek Harness Desktop boot screen" src="assets/screenshot-boot.png" />
+<img width="1280" alt="DeepSeek Harness Desktop" src="assets/screenshot-gui.png" />
 
 <a id="简体中文"></a>
 
@@ -62,16 +62,21 @@ DeepSeek Harness 已经提供完整的 Agent Runtime 和 Web UI。本项目不�
 
 ### 界面预览
 
-启动器页面是客户端的核心界面，覆盖"服务没启动"的各种情况：
+使用流程（打开应用 → 一键启动 → 进入界面）：
 
-| | |
+| 步骤 | 界面 | 说明 |
+|---|---|---|
+| 1. 检测 | ![未检测到服务](assets/screenshot-boot.png) | 打开应用，未检测到本机服务：显示「一键启动服务」按钮 |
+| 2. 启动 | ![正在启动服务](assets/screenshot-starting.png) | 点击后启动 `dsh web`（随机回环端口），显示进度 |
+| 3. 就绪 | ![服务已就绪](assets/screenshot-success.png) | ✓ 服务已就绪，即将打开 GUI |
+| 4. 进入 | ![DeepSeek Harness GUI](assets/screenshot-gui.png) | 进入完整的 DeepSeek Harness 界面 |
+
+异常场景：
+
+| 界面 | 说明 |
 |---|---|
-| ![启动成功：服务已就绪](assets/screenshot-success.png) | ![未检测到服务：一键启动](assets/screenshot-boot.png) |
-| 启动成功：服务已就绪，即将打开 GUI | 未检测到服务：显示「一键启动」 |
-| ![正在启动服务](assets/screenshot-starting.png) | ![启动失败：错误详情与重试](assets/screenshot-error.png) |
-| 正在启动服务（进度提示） | 启动失败：错误详情 +「重试启动」 |
-| ![未找到 dsh：配置指引](assets/screenshot-nolauncher.png) | **连接已有实例** |
-| 未找到 dsh：配置指引 +「重新检测」 | 检测到实例时直接打开（无独立界面） |
+| ![启动失败：错误详情与重试](assets/screenshot-error.png) | 启动失败：错误详情 +「重试启动」+「重新检测」 |
+| ![未找到 dsh：配置指引](assets/screenshot-nolauncher.png) | 未找到 dsh：配置指引 +「重新检测」 |
 
 ### 安装说明
 
@@ -209,16 +214,21 @@ DeepSeek Harness already provides the complete agent runtime and Web UI. This pr
 
 ### Preview
 
-The boot screen is the core UI of the client, covering every "server not running" case:
+The user flow (open the app → one-click start → enter the UI):
 
-| | |
+| Step | Screen | Notes |
+|---|---|---|
+| 1. Detect | ![No server detected](assets/screenshot-boot.png) | No local server found — "Start server" button |
+| 2. Start | ![Starting the server](assets/screenshot-starting.png) | Starts `dsh web` on a random loopback port, shows progress |
+| 3. Ready | ![Server ready](assets/screenshot-success.png) | ✓ Server ready, opening the GUI |
+| 4. Enter | ![DeepSeek Harness GUI](assets/screenshot-gui.png) | Full DeepSeek Harness interface |
+
+Edge cases:
+
+| Screen | Notes |
 |---|---|
-| ![Start success: server ready](assets/screenshot-success.png) | ![No server detected: one-click start](assets/screenshot-boot.png) |
-| Start success — server ready, opening the GUI | No server detected — "Start server" button |
-| ![Starting the server](assets/screenshot-starting.png) | ![Start failure: error details and retry](assets/screenshot-error.png) |
-| Starting the server (progress) | Start failure — error details + "Retry start" |
-| ![dsh not found: setup guidance](assets/screenshot-nolauncher.png) | **Connecting to an existing instance** |
-| `dsh` not found — setup guidance + "Re-detect" | Opens directly when an instance is detected (no separate screen) |
+| ![Start failure: error details and retry](assets/screenshot-error.png) | Start failure — error details + "Retry start" + "Re-detect" |
+| ![dsh not found: setup guidance](assets/screenshot-nolauncher.png) | `dsh` not found — setup guidance + "Re-detect" |
 
 ### Installation
 
