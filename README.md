@@ -20,6 +20,12 @@
   <img alt="Windows" src="https://img.shields.io/badge/Windows-unverified-171513.svg?style=flat-square" />
 </p>
 
+<p align="center">
+  <a href="#简体中文">首页</a> ·
+  <a href="docs/PLUGIN-MARKETPLACE.md">插件市场</a> ·
+  <a href="docs/DEVELOPMENT.md">开发者文档</a>
+</p>
+
 <img width="1280" alt="DeepSeek Harness Desktop" src="assets/screenshot-gui.png" />
 
 <a id="简体中文"></a>
